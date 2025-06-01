@@ -109,6 +109,8 @@ const ProjectDetailPage: React.FC = () => {
       
       let updatedStory;
       if (selectedStory?.id) {
+        storyData.versionStory = selectedStory.versionStory;
+        storyData.versionAttribute = selectedStory.versionAttribute;
         updatedStory = await api.updateUserStory(selectedStory.id, storyData);
         setStories(stories.map(story => 
           story.id === updatedStory.id ? updatedStory : story

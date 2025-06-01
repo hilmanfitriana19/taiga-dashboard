@@ -63,6 +63,8 @@ export interface UserStory {
   timestamps?: number;
   startDate?: string | null;
   finishDate?: string | null;
+  versionStory?: number;
+  versionAttribute?: number;
   customAttributes?: {
     [key: string]: string;
   };

@@ -99,6 +99,8 @@ export class TaigaApiService {
       totalPoints: story.total_points,
       startDate: story.start_date,
       finishDate: story.finish_date,
+      versionStory: story.version || 1,
+      versionAttribute: story.custom_attributes_version || 1,
     }));
   }
 
@@ -130,6 +132,8 @@ export class TaigaApiService {
       timestamps: parseInt(customAttributes.attributes_values?.['1338'] || '0', 10),
       startDate: customAttributes.attributes_values?.['1339'] || null,
       finishDate: customAttributes.attributes_values?.['1340'] || null,
+      versionStory: story.version || 1,
+      versionAttribute: customAttributes.version || 1,
     };
   }
 
@@ -163,19 +167,29 @@ export class TaigaApiService {
       subject: story.title,
       description: story.description,
       status: story.statusId,
-      assigned_to: story.assignedTo,
+      assigned_users: [story.assignedTo],
       priority: story.priority,
-      version:1
+      version: (story.versionStory) ? story.versionStory : 1,
     });
 
     // Update custom attributes
-    await this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${id}`, {
+    const payloadAttribute = {
       attributes_values: {
         '1338': story.timestamps || 0,
-        '1339': story.startDate || null,
-        '1340': story.finishDate || null,
       },
-    });
+      version: (story.versionAttribute) ? story.versionAttribute : 1,
+    };
+
+    // Add start date if available
+    if (story.startDate) {
+      payloadAttribute.attributes_values['1339'] = story.startDate;
+    }
+    
+    if (story.finishDate) {
+      payloadAttribute.attributes_values['1340'] = story.finishDate;
+    }
+
+    await this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${id}`, payloadAttribute);
     
     return this.getUserStory(id);
   }

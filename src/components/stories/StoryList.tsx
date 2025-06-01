@@ -24,8 +24,6 @@ const StoryList: React.FC<StoryListProps> = ({ stories: initialStories, onStoryC
       try {
         setLoading(true);
         const api = createTaigaApiService();
-        console.log('projectId:', projectId);
-        console.log('Fetching stories with filters:', filters);
 
         // If there's an assignee filter, fetch stories for that assignee
         if (filters.assignee) {

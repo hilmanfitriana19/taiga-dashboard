@@ -53,12 +53,8 @@ const StoryForm: React.FC<StoryFormProps> = ({
       setFormData(prev => ({ ...prev, priority: middlePriority.id }));
     }
 
-    console.log('Form data initialized:', formData);
-
-    
     // Initialize dates and points from initial data if editing
     if (initialData.id) {
-      console.log('Editing existing story:', initialData);
       // Parse start date
       if (initialData.startDate) {
         const parsedStartDate = parse(initialData.startDate, "dd-MM-yyyy HH:mm:ss", new Date());
@@ -80,9 +76,6 @@ const StoryForm: React.FC<StoryFormProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
-    console.log(`Field changed: ${name} = ${value}`);
-
     setFormData({
       ...formData,
       [name]: ['statusId', 'priority', 'assignedTo', 'timestamps'].includes(name) 
