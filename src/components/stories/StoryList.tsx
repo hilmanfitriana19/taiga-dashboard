@@ -29,7 +29,7 @@ const StoryList: React.FC<StoryListProps> = ({ stories: initialStories, onStoryC
 
         // If there's an assignee filter, fetch stories for that assignee
         if (filters.assignee) {
-          const stories = await api.getProjectUserStories(projectId, filters.assignee ?? '');
+          const stories = await api.getProjectUserStories(projectId, filters?.assignee ?? '');
           setFilteredStories(stories);
         } else {
           // If no assignee filter, use the initial stories

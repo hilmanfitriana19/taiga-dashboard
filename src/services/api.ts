@@ -111,9 +111,6 @@ export class TaigaApiService {
     const story = storyResponse.data;
     const customAttributes = customAttributesResponse.data;
 
-    console.log('User Story Response:', story);
-    console.log('Custom Attributes Response:', customAttributes);
-
     return {
       id: story.id,
       ref: story.ref,
@@ -127,7 +124,7 @@ export class TaigaApiService {
       modifiedDate: story.modified_date,
       assignedTo: story.assigned_to,
       assignedToName: story.assigned_to_extra_info?.full_name_display,
-      priority: story.priority,
+      priority: story.priority ?? 439, // Default priority if not set
       priorityName: story.priority_extra_info?.name,
       customAttributes: customAttributes.attributes_values,
       timestamps: parseInt(customAttributes.attributes_values?.['1338'] || '0', 10),
@@ -150,7 +147,7 @@ export class TaigaApiService {
     if (story.timestamps || story.startDate || story.finishDate) {
       await this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${response.data.id}`, {
         attributes_values: {
-          '1338': story.timestamps?.toString() || '0',
+          '1338': story.timestamps || 0,
           '1339': story.startDate || null,
           '1340': story.finishDate || null,
         },
@@ -168,12 +165,13 @@ export class TaigaApiService {
       status: story.statusId,
       assigned_to: story.assignedTo,
       priority: story.priority,
+      version:1
     });
 
     // Update custom attributes
     await this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${id}`, {
       attributes_values: {
-        '1338': story.timestamps?.toString() || '0',
+        '1338': story.timestamps || 0,
         '1339': story.startDate || null,
         '1340': story.finishDate || null,
       },

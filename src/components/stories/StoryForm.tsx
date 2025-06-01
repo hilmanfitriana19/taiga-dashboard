@@ -30,7 +30,7 @@ const StoryForm: React.FC<StoryFormProps> = ({
     title: '',
     description: '',
     statusId: 0,
-    priority: 0,
+    priority: 439,
     assignedTo: null,
     timestamps: 0,
     startDate: null,
@@ -53,18 +53,17 @@ const StoryForm: React.FC<StoryFormProps> = ({
       setFormData(prev => ({ ...prev, priority: middlePriority.id }));
     }
 
+    console.log('Form data initialized:', formData);
+
+    
     // Initialize dates and points from initial data if editing
     if (initialData.id) {
       console.log('Editing existing story:', initialData);
       // Parse start date
       if (initialData.startDate) {
-          const parsedStartDate = parse(initialData.startDate, "dd-MM-yyyy HH:mm:ss", new Date());
-
+        const parsedStartDate = parse(initialData.startDate, "dd-MM-yyyy HH:mm:ss", new Date());
         if (!isNaN(parsedStartDate.getTime())) {
-          console.log('Parsed start date:', parsedStartDate);
           setStartDate(parsedStartDate);
-        }else{
-          console.error('Invalid start date:', initialData.startDate);
         }
       }
 
@@ -76,15 +75,14 @@ const StoryForm: React.FC<StoryFormProps> = ({
         }
       }
 
-      // Set total points
-      if (initialData.timestamps !== undefined) {
-        setFormData(prev => ({ ...prev, timestamps: initialData.timestamps }));
-      }
     }
-  }, [initialData, statuses, priorities, formData.statusId, formData.priority]);
+  }, [initialData, statuses, priorities, formData.statusId, formData.priority, formData.timestamps]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    console.log(`Field changed: ${name} = ${value}`);
+
     setFormData({
       ...formData,
       [name]: ['statusId', 'priority', 'assignedTo', 'timestamps'].includes(name) 
@@ -214,15 +212,15 @@ const StoryForm: React.FC<StoryFormProps> = ({
           </div>
 
           <div>
-            <label htmlFor="timestamp" className="block text-sm font-medium text-surface-300 mb-1">
+            <label htmlFor="timestamps" className="block text-sm font-medium text-surface-300 mb-1">
               Timestamps (minutes)
             </label>
             <input
-              id="timestamp"
-              name="timestamp"
+              id="timestamps"
+              name="timestamps"
               type="number"
-              min="0"
-              value={formData.timestamps || 0}
+              
+              value={formData.timestamps ?? ''}
               onChange={handleChange}
               className="input w-full"
               placeholder="Enter estimated time in minutes"
@@ -233,9 +231,9 @@ const StoryForm: React.FC<StoryFormProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-dark-800">
-          <div className="mb-4 bg-dark-800">
-            <label htmlFor="startDate" className="block text-sm font-medium text-surface-300 mb-1 bg-dark-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mb-4">
+            <label htmlFor="startDate" className="block text-sm font-medium text-surface-300 mb-1">
               Start Date and Time
             </label>
             <ReactDatePicker
