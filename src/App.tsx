@@ -10,7 +10,7 @@ import { Toaster } from 'react-hot-toast';
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/taiga-dashboard">
         <Toaster 
           position="top-right"
           toastOptions={{
