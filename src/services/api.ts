@@ -1,5 +1,5 @@
-import axios, { AxiosRequestConfig } from 'axios';
-import { Project, UserStory, Task, ApiResponse, Status, Priority } from '../types';
+import axios from 'axios';
+import { Project, UserStory, Task, Status, Priority } from '../types';
 
 // Create axios instance
 const createApiClient = (baseURL: string, authToken: string) => {
