@@ -57,7 +57,7 @@ const StoryForm: React.FC<StoryFormProps> = ({
     if (initialData.id) {
       // Parse start date
       if (initialData.startDate) {
-        const parsedStartDate = parse(initialData.startDate, "dd-MM-yyyy HH:mm:ss", new Date());
+        const parsedStartDate = parse(initialData.startDate, "yyyy-MM-dd HH:mm:ss", new Date());
         if (!isNaN(parsedStartDate.getTime())) {
           setStartDate(parsedStartDate);
         }
@@ -65,7 +65,7 @@ const StoryForm: React.FC<StoryFormProps> = ({
 
       // Parse finish date
       if (initialData.finishDate) {
-        const parsedFinishDate = parse(initialData.finishDate, "dd-MM-yyyy HH:mm:ss", new Date());
+        const parsedFinishDate = parse(initialData.finishDate, "yyyy-MM-dd HH:mm:ss", new Date());
         if (!isNaN(parsedFinishDate.getTime())) {
           setFinishDate(parsedFinishDate);
         }
@@ -251,7 +251,7 @@ const StoryForm: React.FC<StoryFormProps> = ({
               onChange={handleFinishDateChange}
               showTimeSelect
               timeFormat="HH:mm"
-              timeIntervals={15}
+              timeIntervals={30}
               dateFormat="yyyy-MM-dd HH:mm"
               className="input w-full"
               placeholderText="Select finish date and time"

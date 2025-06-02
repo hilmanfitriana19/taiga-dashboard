@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Project, UserStory, Task, Status, Priority } from '../types';
+import { format } from 'date-fns';
 
 // Create axios instance
 const createApiClient = (baseURL: string, authToken: string) => {
@@ -163,34 +164,35 @@ export class TaigaApiService {
 
   async updateUserStory(id: number, story: Partial<UserStory>): Promise<UserStory> {
     // Update story details
-    await this.apiClient.patch(`/api/v1/userstories/${id}`, {
-      subject: story.title,
-      description: story.description,
-      status: story.statusId,
-      assigned_users: [story.assignedTo],
-      priority: story.priority,
-      version: (story.versionStory) ? story.versionStory : 1,
-    });
 
-    // Update custom attributes
-    const payloadAttribute = {
-      attributes_values: {
-        '1338': story.timestamps || 0,
-      },
-      version: (story.versionAttribute) ? story.versionAttribute : 1,
-    };
+    const currentStory = await this.getUserStory(id);
+  
+    let startDate = null;
+    let finishDate = null;
 
-    // Add start date if available
-    if (story.startDate) {
-      payloadAttribute.attributes_values['1339'] = story.startDate;
+    if(story.startDate && story.finishDate) {
+      startDate = format (new Date(new Date(story.startDate).getTime() + 60 * 1000),'yyyy-MM-dd HH:mm:ss');
+      finishDate = format (new Date(new Date(story.finishDate).getTime() + 60 * 1000),'yyyy-MM-dd HH:mm:ss');
     }
     
-    if (story.finishDate) {
-      payloadAttribute.attributes_values['1340'] = story.finishDate;
-    }
-
-    await this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${id}`, payloadAttribute);
-    
+      await Promise.all([
+      this.apiClient.patch(`/api/v1/userstories/${id}`, {
+        subject: story.title,
+        description: story.description,
+        status: story.statusId,
+        assigned_to: story.assignedTo,
+        priority: story.priority,
+        version: currentStory.versionStory
+      }),
+      this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${id}`, {
+          attributes_values: {
+            '1338': story.timestamps?.toString() || '0',
+            '1339': startDate || null,
+            '1340': finishDate || null,
+          },
+          version: (currentStory.versionAttribute) ? currentStory.versionAttribute : 1,
+      })
+    ]);
     return this.getUserStory(id);
   }
 
