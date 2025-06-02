@@ -197,8 +197,14 @@ export class TaigaApiService {
   }
 
   // Tasks
-  async getProjectTasks(projectId: number): Promise<Task[]> {
-    const response = await this.apiClient.get(`/api/v1/tasks?project=${projectId}`);
+  async getProjectTasks(projectId: number, assignee : string): Promise<Task[]> {
+
+    let url = `/api/v1/userstories?project=${projectId}&order_by=-created_date`;
+    if (assignee) {
+      url += `&owner=${assignee}`;
+    }
+    
+    const response = await this.apiClient.get(url);
     return response.data.map((task: any) => ({
       id: task.id,
       ref: task.ref,

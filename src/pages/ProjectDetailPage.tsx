@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 const ProjectDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const projectId = Number(id);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   
   const [project, setProject] = useState<Project | null>(null);
@@ -39,6 +39,12 @@ const ProjectDetailPage: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Filters state
+  const [taskFilters, setTaskFilters] = useState({
+    assignee: '',
+    creator: '',
+  });
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -53,6 +59,10 @@ const ProjectDetailPage: React.FC = () => {
         setError(null);
         const api = createTaigaApiService();
         
+        const savedUser = localStorage.getItem('taiga_user');
+        const userId = JSON.parse(savedUser || '{}').id;
+        
+        taskFilters.assignee = userId.toString(); // Default to current user
         // Fetch all data in parallel
         const [
           projectData,
@@ -64,8 +74,8 @@ const ProjectDetailPage: React.FC = () => {
           membersData
         ] = await Promise.all([
           api.getProject(projectId),
-          api.getProjectUserStories(projectId),
-          api.getProjectTasks(projectId),
+          api.getProjectUserStories(projectId, userId),
+          api.getProjectTasks(projectId, taskFilters.assignee),
           api.getProjectUserStoryStatuses(projectId),
           api.getProjectTaskStatuses(projectId),
           api.getProjectPriorities(projectId),
@@ -88,7 +98,7 @@ const ProjectDetailPage: React.FC = () => {
     };
 
     fetchProjectData();
-  }, [projectId, isAuthenticated, navigate]);
+  }, [projectId, isAuthenticated, navigate, taskFilters]);
 
   const handleStoryClick = async (story: UserStory) => {
     try {
@@ -158,6 +168,10 @@ const ProjectDetailPage: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleTaskFilterChange = (filters: { assignee: string; creator: string }) => {
+    setTaskFilters(filters);
   };
 
   if (loading) {
@@ -269,17 +283,34 @@ const ProjectDetailPage: React.FC = () => {
           projectId={projectId}
         />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tasks.map(task => (
-            <TaskCard 
-              key={task.id} 
-              task={task}
-              onClick={() => {
-                setSelectedTask(task);
-                setIsTaskModalOpen(true);
-              }}
-            />
-          ))}
+        <div className="space-y-6">
+          <div className="flex gap-4">
+            <select
+              className="input"
+              value={taskFilters.assignee}
+              onChange={(e) => handleTaskFilterChange({ ...taskFilters, assignee: e.target.value })}
+            >
+              <option value="">All Assignees</option>
+              {projectMembers.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.fullName}
+                </option>
+              ))}
+            </select>
+            
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tasks.map(task => (
+              <TaskCard 
+                key={task.id} 
+                task={task}
+                onClick={() => {
+                  setSelectedTask(task);
+                  setIsTaskModalOpen(true);
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -339,4 +370,4 @@ const ProjectDetailPage: React.FC = () => {
   );
 };
 
-export default ProjectDetailPage
+export default ProjectDetailPage;
