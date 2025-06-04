@@ -10,6 +10,7 @@ import StoryList from '../components/stories/StoryList';
 import StoryForm from '../components/stories/StoryForm';
 import TaskForm from '../components/tasks/TaskForm';
 import TaskCard from '../components/tasks/TaskCard';
+import TaskTimeModal from '../components/tasks/TaskTimeModal';
 import { Plus, FileText, ClipboardList, ChevronLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -35,6 +36,7 @@ const ProjectDetailPage: React.FC = () => {
   // Modals state
   const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [isTaskTimeModalOpen, setIsTaskTimeModalOpen] = useState(false);
   const [selectedStory, setSelectedStory] = useState<UserStory | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,6 +176,16 @@ const ProjectDetailPage: React.FC = () => {
     setTaskFilters(filters);
   };
 
+  const refreshTasks = async () => {
+    try {
+      const api = createTaigaApiService();
+      const updatedTasks = await api.getProjectTasks(projectId, taskFilters.assignee);
+      setTasks(updatedTasks);
+    } catch (error) {
+      console.error('Error refreshing tasks:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -297,7 +309,18 @@ const ProjectDetailPage: React.FC = () => {
                 </option>
               ))}
             </select>
-            
+            <select
+              className="input"
+              value={taskFilters.creator}
+              onChange={(e) => handleTaskFilterChange({ ...taskFilters, creator: e.target.value })}
+            >
+              <option value="">All Creators</option>
+              {projectMembers.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.fullName}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tasks.map(task => (
@@ -307,6 +330,10 @@ const ProjectDetailPage: React.FC = () => {
                 onClick={() => {
                   setSelectedTask(task);
                   setIsTaskModalOpen(true);
+                }}
+                onTimeClick={() => {
+                  setSelectedTask(task);
+                  setIsTaskTimeModalOpen(true);
                 }}
               />
             ))}
@@ -366,6 +393,19 @@ const ProjectDetailPage: React.FC = () => {
           isSubmitting={isSubmitting}
         />
       </Modal>
+
+      {/* Task Time Modal */}
+      {selectedTask && (
+        <TaskTimeModal
+          task={selectedTask}
+          isOpen={isTaskTimeModalOpen}
+          onClose={() => {
+            setIsTaskTimeModalOpen(false);
+            setSelectedTask(null);
+          }}
+          onUpdate={refreshTasks}
+        />
+      )}
     </div>
   );
 };

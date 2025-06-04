@@ -1,15 +1,16 @@
 import React from 'react';
 import { Task } from '../../types';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, LinkIcon, User } from 'lucide-react';
+import { Calendar, LinkIcon, User } from 'lucide-react';
 import { format, isPast, isToday } from 'date-fns';
 
 interface TaskCardProps {
   task: Task;
   onClick: () => void;
+  onTimeClick?: () => void;
 }
 
-const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
+const TaskCard: React.FC<TaskCardProps> = ({ task, onClick, onTimeClick }) => {
   // Function to determine badge color based on status
   const getStatusColor = (status: string) => {
     const lowerStatus = status.toLowerCase();
@@ -52,6 +53,11 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
   const statusClass = getStatusColor(task.status);
   const dueDateStatus = task.dueDate ? getDueDateStatus(task.dueDate) : null;
 
+  const handleTimeClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onTimeClick?.();
+  };
+
   return (
     <motion.div 
       whileHover={{ y: -4 }}
@@ -84,12 +90,13 @@ const TaskCard: React.FC<TaskCardProps> = ({ task, onClick }) => {
         
         <div className="flex flex-wrap items-center justify-between pt-2 gap-y-2">
           {dueDateStatus && (
-            <div className="flex items-center gap-1.5">
-              <Calendar size={14} className="text-surface-400" />
-              <span className={`text-xs badge ${dueDateStatus.class}`}>
-                {dueDateStatus.label}
-              </span>
-            </div>
+            <button
+              onClick={handleTimeClick}
+              className={`flex items-center gap-1.5 text-xs badge ${dueDateStatus.class}`}
+            >
+              <Calendar size={14} />
+              <span>{dueDateStatus.label}</span>
+            </button>
           )}
           
           {task.assignedToName && (

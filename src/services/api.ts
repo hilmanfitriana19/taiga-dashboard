@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { Project, UserStory, Task, Status, Priority } from '../types';
-import { format } from 'date-fns';
 
 // Create axios instance
 const createApiClient = (baseURL: string, authToken: string) => {
@@ -138,7 +137,7 @@ export class TaigaApiService {
     };
   }
 
-  async createUserStory(story: Partial<UserStory>): Promise<UserStory> {
+    async createUserStory(story: Partial<UserStory>): Promise<UserStory> {
     const response = await this.apiClient.post('/api/v1/userstories', {
       subject: story.title,
       description: story.description,
@@ -163,10 +162,11 @@ export class TaigaApiService {
   }
 
   async updateUserStory(id: number, story: Partial<UserStory>): Promise<UserStory> {
-    // Update story details
-
+    // Get current story to get the version
     const currentStory = await this.getUserStory(id);
-  
+
+    // Update both story and attributes in parallel
+
     let startDate = null;
     let finishDate = null;
 
@@ -174,8 +174,7 @@ export class TaigaApiService {
       startDate = format (new Date(new Date(story.startDate).getTime() + 60 * 1000),'yyyy-MM-dd HH:mm:ss');
       finishDate = format (new Date(new Date(story.finishDate).getTime() + 60 * 1000),'yyyy-MM-dd HH:mm:ss');
     }
-    
-      await Promise.all([
+    await Promise.all([
       this.apiClient.patch(`/api/v1/userstories/${id}`, {
         subject: story.title,
         description: story.description,
@@ -184,7 +183,7 @@ export class TaigaApiService {
         priority: story.priority,
         version: currentStory.versionStory
       }),
-      this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${id}`, {
+        this.apiClient.patch(`/api/v1/userstories/custom-attributes-values/${id}`, {
           attributes_values: {
             '1338': story.timestamps?.toString() || '0',
             '1339': startDate || null,
@@ -193,6 +192,7 @@ export class TaigaApiService {
           version: (currentStory.versionAttribute) ? currentStory.versionAttribute : 1,
       })
     ]);
+    // Return the complete updated story with attributes
     return this.getUserStory(id);
   }
 
@@ -204,7 +204,37 @@ export class TaigaApiService {
       url += `&owner=${assignee}`;
     }
     
-    const response = await this.apiClient.get(url);
+  const response = await this.apiClient.get(url);
+    return response.data.map((task: any) => ({
+      id: task.id,
+      ref: task.ref,
+      title: task.subject,
+      description: task.description || '',
+      status: task.status_extra_info?.name || '',
+      statusId: task.status,
+      projectId: task.project,
+      userStoryId: task.user_story,
+      userStoryTitle: task.user_story_extra_info?.subject,
+      createdDate: task.created_date,
+      modifiedDate: task.modified_date,
+      dueDate: task.due_date,
+      assignedTo: task.assigned_to,
+      assignedToName: task.assigned_to_extra_info?.full_name_display,
+    }));
+  }
+
+  async getListTasks(projectId: number, assignee : string, user_story: string): Promise<Task[]> {
+
+    let url = `/api/v1/tasks?project=${projectId}&order_by=-created_date`;
+    if (assignee) {
+      url += `&owner=${assignee}`;
+    }
+
+    if (user_story) {
+      url += `&user_story=${user_story}`;
+    }
+    
+  const response = await this.apiClient.get(url);
     return response.data.map((task: any) => ({
       id: task.id,
       ref: task.ref,
