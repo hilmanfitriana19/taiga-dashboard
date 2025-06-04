@@ -136,7 +136,6 @@ export class TaigaApiService {
       versionAttribute: customAttributes.version || 1,
     };
   }
-
     async createUserStory(story: Partial<UserStory>): Promise<UserStory> {
     const response = await this.apiClient.post('/api/v1/userstories', {
       subject: story.title,

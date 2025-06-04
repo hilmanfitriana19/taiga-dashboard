@@ -86,6 +86,11 @@ export interface Task {
   assignedTo?: number | null;
   assignedToName?: string | null;
   userStoryTitle?: string;
+  createdBy?: number;
+  createdByName?: string;
+  startDate?: string | null;
+  endDate?: string | null;
+  timeSpent?: number;
 }
 
 // Status types
