@@ -19,7 +19,7 @@ const LoginForm: React.FC = () => {
     try {
       await login({ username, password, taigaUrl });
       navigate('/');
-    } catch (error) {
+    } catch {
       // Error is handled in the AuthContext
     }
   };
