@@ -1,15 +1,18 @@
-import React from 'react';
-import { UserStory } from '../../types';
+import React, { useState } from 'react';
+import { UserStory, Task } from '../../types';
 import { motion } from 'framer-motion';
-import { FileText, Calendar, User } from 'lucide-react';
+import { Calendar, User, ListTodo } from 'lucide-react';
 import { format } from 'date-fns';
+import Spinner from '../ui/Spinner';
+import { createTaigaApiService } from '../../services/api';
 
 interface StoryCardProps {
   story: UserStory;
   onClick: () => void;
+  projectId: number;
 }
 
-const StoryCard: React.FC<StoryCardProps> = ({ story, onClick }) => {
+const StoryCard: React.FC<StoryCardProps> = ({ story, onClick, projectId }) => {
   // Function to determine badge color based on status
   const getStatusColor = (status: string) => {
     const lowerStatus = status.toLowerCase();
@@ -38,6 +41,27 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, onClick }) => {
     } else {
       return 'bg-surface-500/20 text-surface-300 border-surface-500/20';
     }
+  };
+
+  const [showTasks, setShowTasks] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(false);
+
+  const toggleTasks = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!showTasks && tasks.length === 0) {
+      try {
+        setLoadingTasks(true);
+        const api = createTaigaApiService();
+        const data = await api.getListTasks(projectId, '', story.id.toString());
+        setTasks(data);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+      } finally {
+        setLoadingTasks(false);
+      }
+    }
+    setShowTasks(!showTasks);
   };
 
   const statusClass = getStatusColor(story.status);
@@ -84,6 +108,34 @@ const StoryCard: React.FC<StoryCardProps> = ({ story, onClick }) => {
           <div className="flex items-center gap-1.5 text-xs text-surface-400">
             <User size={14} />
             <span className="truncate max-w-[100px]">{story.assignedToName}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-2">
+        <button
+          onClick={toggleTasks}
+          className="text-xs text-primary-400 hover:underline flex items-center gap-1"
+        >
+          <ListTodo size={14} />
+          {showTasks ? 'Hide Tasks' : `Show Tasks (${tasks.length})`}
+        </button>
+
+        {showTasks && (
+          <div className="mt-2">
+            {loadingTasks ? (
+              <Spinner size="sm" />
+            ) : tasks.length === 0 ? (
+              <p className="text-xs text-surface-400">No tasks</p>
+            ) : (
+              <ul className="list-disc list-inside space-y-1">
+                {tasks.map(task => (
+                  <li key={task.id} className="text-xs text-surface-200">
+                    #{task.ref} {task.title}
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         )}
       </div>

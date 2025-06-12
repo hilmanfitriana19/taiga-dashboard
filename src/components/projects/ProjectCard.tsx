@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Project } from '../../types';
-import { FolderKanban, Users, FileText, ClipboardList } from 'lucide-react';
+import { FileText, ClipboardList } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ProjectCardProps {
