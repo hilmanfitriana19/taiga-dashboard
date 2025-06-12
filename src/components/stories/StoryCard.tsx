@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { UserStory, Task } from '../../types';
 import { motion } from 'framer-motion';
-import { Calendar, User, ListTodo } from 'lucide-react';
+import { FileText, Calendar, User, ListTodo } from 'lucide-react';
 import { format } from 'date-fns';
 import Spinner from '../ui/Spinner';
 import { createTaigaApiService } from '../../services/api';
