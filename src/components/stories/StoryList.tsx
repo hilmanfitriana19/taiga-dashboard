@@ -133,7 +133,11 @@ const StoryList: React.FC<StoryListProps> = ({ stories: initialStories, onStoryC
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <StoryCard story={story} onClick={() => onStoryClick(story)} />
+                      <StoryCard
+                        story={story}
+                        onClick={() => onStoryClick(story)}
+                        projectId={projectId}
+                      />
                     </motion.div>
                   ))}
                 </AnimatePresence>
